@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alejandro Fast Food Kiosk</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- GLOBAL HEADER: shown on every screen except Welcome -->
+<header id="top" style="display:none">
+  <div class="logo" style="width:48px;height:48px;font-size:1.7rem;box-shadow:0 0 0 4px var(--main)">A</div>
+  <b>Alejandro Fast Food</b>
+  <span class="tag" id="stepTag"></span>
+  <span class="tag" id="typeTag" style="background:var(--pale)"></span>
+  <button class="ghost" id="cancelBtn" onclick="cancelOrder()">Cancel Order</button>
+</header>
+
+<!-- 1. WELCOME -->
+<section class="screen center on" id="welcome" style="background:radial-gradient(circle,#fff,var(--pale))">
+  <div class="logo">A</div>
+  <h1>Alejandro<br>Fast Food</h1>
+  <p style="font-size:1.6rem;color:var(--deep)">Fresh. Fast. Fiesta in every bite!</p>
+  <button class="cta pulse" onclick="show('type')">TOUCH TO ORDER</button>
+</section>
+
+<!-- 2. ORDER TYPE -->
+<section class="screen center" id="type">
+  <h2>How will you enjoy your meal?</h2>
+  <div class="types">
+    <button onclick="setType('Dine In')"><svg class="ic" width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.5 1.5-3 5-3 8h3"/></svg><br>Dine In</button>
+    <button onclick="setType('Take Out')"><svg class="ic" width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg><br>Take Out</button>
+  </div>
+</section>
+
+<!-- 3. ITEM SELECTION -->
+<section class="screen" id="shop">
+  <div class="shop">
+    <nav class="cats" id="cats"></nav>
+    <div class="grid" id="grid"></div>
+    <aside class="cart">
+      <h3>Your Order · <span id="cartType"></span></h3>
+      <div class="lines" id="lines"></div>
+      <div class="tot">
+        <div><span>Subtotal</span><span id="cSub"></span></div>
+        <div style="color:var(--deep)"><span>TOTAL</span><span id="cTot"></span></div>
+        <button class="cta" onclick="toPayment('shop')">Proceed to Payment</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- 4. ORDER SUMMARY -->
+<section class="screen center" id="summary">
+  <div class="panel">
+    <h2>Order Summary</h2>
+    <p id="sumType" style="margin-bottom:10px;color:var(--main);font-weight:700"></p>
+    <table id="sumTable"></table>
+    <div class="row" style="margin-top:20px">
+      <button class="ghost" onclick="show('shop')">Back</button>
+      <button class="cta" onclick="toPayment('summary')">Continue to Payment</button>
+    </div>
+  </div>
+</section>
+
+<!-- 5. PAYMENT METHOD -->
+<section class="screen center" id="method">
+  <h2>Choose payment method</h2>
+  <p class="big" id="mTotal"></p>
+  <div class="row methods" style="width:min(900px,100%)">
+    <button onclick="chooseMethod('Cash')"><svg class="ic" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg><br>Cash</button>
+    <button onclick="chooseMethod('QR Payment')"><svg class="ic" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M17 20h4M14 20v.01"/></svg><br>QR Payment</button>
+    <button onclick="chooseMethod('Credit/Debit Card')"><svg class="ic" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg><br>Credit/Debit Card</button>
+  </div>
+  <button class="ghost" onclick="show('summary')">Back</button>
+</section>
+
+<!-- Pay: Cash -->
+<section class="screen center" id="payCash">
+  <div class="panel">
+    <h2>Cash Payment</h2>
+    <p>Total due</p><p class="big" id="cashDue"></p>
+    <input type="text" id="cashIn" inputmode="decimal" placeholder="Amount paid" oninput="calcChange()" autocomplete="off">
+    <div class="row quick" style="margin:14px 0">
+      <button onclick="quick('exact')">Exact</button>
+      <button onclick="quick(100)">₱100</button><button onclick="quick(200)">₱200</button>
+      <button onclick="quick(500)">₱500</button><button onclick="quick(1000)">₱1000</button>
+    </div>
+    <p class="chg" id="chg">Change: ₱0.00</p>
+    <p class="err" id="cashErr"></p>
+    <div class="row"><button class="ghost" onclick="show('method')">Back</button>
+    <button class="cta" onclick="payCash()">Pay Now</button></div>
+  </div>
+</section>
+
+<!-- Pay: QR -->
+<section class="screen center" id="payQR">
+  <div class="panel">
+    <h2>QR Payment</h2><p class="big" id="qrAmt"></p>
+    <div id="qrBox" style="width:240px;margin:14px auto"></div>
+    <p>Scan the QR code using your supported payment application.</p>
+    <div class="row" style="margin-top:16px"><button class="ghost" onclick="show('method')">Back</button>
+    <button class="cta" onclick="payDigital('QR Payment',800)">Confirm Payment</button></div>
+  </div>
+</section>
+
+<!-- Pay: Card -->
+<section class="screen center" id="payCard">
+  <div class="panel">
+    <h2>Credit/Debit Card</h2><p class="big" id="cardAmt"></p>
+    <p style="color:var(--main)"><svg class="ic" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg></p>
+    <p>Please tap, insert, or swipe your card.</p>
+    <div class="row" style="margin-top:16px"><button class="ghost" onclick="show('method')">Back</button>
+    <button class="cta" onclick="payDigital('Credit/Debit Card',2000)">Process Payment</button></div>
+  </div>
+</section>
+
+<!-- Processing -->
+<section class="screen center" id="processing">
+  <div class="spin"></div><h2>Processing payment…</h2>
+</section>
+
+<!-- 6. SUCCESS -->
+<section class="screen center" id="success">
+  <div class="check">✓</div><h2>Payment Successful!</h2>
+  <p>Your order number</p><h1 id="sOrder"></h1>
+  <div class="panel" style="padding:18px">
+    <div class="kv"><span>Reference</span><b id="sRef"></b></div>
+    <div class="kv"><span>Amount</span><b id="sAmt"></b></div>
+    <div class="kv"><span>Amount paid</span><b id="sPaid"></b></div>
+    <div class="kv"><span>Payment method</span><b id="sMeth"></b></div>
+  </div>
+  <button class="cta" onclick="show('receipt')">View Receipt</button>
+</section>
+
+<!-- 7. RECEIPT -->
+<section class="screen center" id="receipt">
+  <div class="panel rcpt" id="rcptBox"></div>
+  <button class="cta" onclick="newTransaction()">New Transaction</button>
+</section>
+
+<div id="dlg" style="display:none;position:fixed;inset:0;background:#000a;z-index:20;align-items:center;justify-content:center">
+  <div class="panel" style="text-align:center;width:min(480px,92%)"><h2>Cancel this order?</h2>
+  <p style="margin:10px 0 20px">All items will be removed.</p>
+  <div class="row"><button class="ghost" onclick="$('dlg').style.display='none'">Keep Order</button>
+  <button style="background:var(--bad)" onclick="$('dlg').style.display='none';resetAll();toast('Order cancelled')">Yes, Cancel</button></div></div>
+</div>
+<div id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
